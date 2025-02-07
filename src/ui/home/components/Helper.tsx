@@ -60,6 +60,30 @@ export const CreditCardLayout = () => {
     NexSection.value = pushNext ? true : false;
   });
 
+  const HideSuccessMessage = useAnimatedStyle(() => ({
+    opacity: withDelay(
+      3000,
+      withTiming(NexSection.value ? 1 : 0, {duration: 1000}),
+    ),
+    display: NexSection.value ? 'flex' : 'none',
+  }));
+
+  const ScaleSuccessMessageIcon = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: withDelay(
+          3500,
+          withTiming(
+            NexSection.value ? SizeConfig.width * 0.15 : SizeConfig.width * 0,
+            {
+              duration: 500,
+            },
+          ),
+        ),
+      },
+    ],
+  }));
+
   const NextSectionAnimatedStyles = useAnimatedStyle(() => ({
     position: withTiming(NexSection.value ? 'relative' : 'absolute', {
       duration: 2000,
@@ -414,7 +438,7 @@ export const CreditCardLayout = () => {
                 gap: SizeConfig.width * 13,
                 width: '100%',
                 justifyContent: 'center',
-                height: SizeConfig.height * 8,
+                height: SizeConfig.height * 7,
               }}>
               {/* Wrapping an Animated.View inside GestureDetector */}
               <GestureDetector gesture={NextSectionTapGesture}>
@@ -478,6 +502,51 @@ export const CreditCardLayout = () => {
               Verifying Your Card
             </Animated.Text>
           </View>
+
+          <Animated.View
+            style={[
+              {
+                backgroundColor: 'black',
+                borderRadius: SizeConfig.width * 3,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                // zIndex: -2,
+                gap: SizeConfig.height * 2,
+              },
+              HideSuccessMessage,
+            ]}>
+            <Animated.View
+              style={[
+                {
+                  backgroundColor: '#f86f15',
+                  width: SizeConfig.width * 15,
+                  height: SizeConfig.width * 15,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: (SizeConfig.width * 15) / 2,
+                },
+                ScaleSuccessMessageIcon,
+              ]}>
+              <Image
+                source={require('../../../assets/images/Home/tick.png')}
+                style={{
+                  width: SizeConfig.width * 10,
+                  height: SizeConfig.width * 10,
+                  resizeMode: 'center',
+                  tintColor: 'white',
+                }}
+              />
+            </Animated.View>
+            <Text
+              style={{
+                fontSize: SizeConfig.fontSize * 4,
+                color: 'white',
+                fontFamily: 'RedHatDisplay-Bold',
+              }}>
+              Successfully Added!
+            </Text>
+          </Animated.View>
         </View>
       </View>
     </GestureHandlerRootView>
