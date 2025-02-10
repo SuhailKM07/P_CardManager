@@ -3,6 +3,6 @@ import CardDetailsSlice from './slices/CardDetailsSlice';
 
 export const Store = configureStore({
   reducer: {
-    CardDetailsSlice,
+    CardDetailsSlice: CardDetailsSlice,
   },
 });

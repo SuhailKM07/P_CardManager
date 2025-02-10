@@ -3,14 +3,13 @@ import {createSlice} from '@reduxjs/toolkit';
 const CardDetailsSlice = createSlice({
   name: 'CardDetails',
   initialState: {
-    list: [],
+    list: [{name: 'scr'}],
     error: '',
     loading: false,
   },
   reducers: {
     AllCardDetails(state, action) {
-      console.log(action.payload);
-      //   state.list = action.payload;
+      state.list = [...state.list, action.payload];
     },
   },
 });
