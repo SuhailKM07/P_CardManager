@@ -36,7 +36,9 @@ export default function HomeScreen() {
         }}>
         <View style={{gap: SizeConfig.width * 5}}>
           <Headder />
-          <CreditCardLayout />
+          <GestureHandlerRootView style={{flex: 1}}>
+            <CreditCardLayout />
+          </GestureHandlerRootView>
         </View>
       </ScrollView>
     </SafeAreaView>
