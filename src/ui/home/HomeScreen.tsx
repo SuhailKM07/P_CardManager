@@ -22,9 +22,9 @@ import Animated, {
   withDelay,
   runOnJS,
 } from 'react-native-reanimated';
-import analytics from '@react-native-firebase/analytics';
 import {RootState} from '../../redux/Store';
 import {useSelector} from 'react-redux';
+
 export default function HomeScreen() {
   const onPurchase = useSharedValue(false);
   const [reSetUI, setAnimatedUi] = useState(false);
@@ -38,28 +38,35 @@ export default function HomeScreen() {
   });
 
   useEffect(() => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       onPurchase.value = false;
-    }, 9000);
-  }, [reSetUI]);
+      setAnimatedUi(false);
+      console.log('Timeout executed: onPurchase.value set to false');
+    }, 10000);
+
+    console.log('onPurchase.value:', onPurchase.value);
+    console.log('reSetUI:', reSetUI);
+
+    return () => clearTimeout(timeout); // Cleanup timeout on re-renders/unmount
+  }, [reSetUI]); // Runs only when reSetUI changes
 
   const ChangingTheScreenHeight = useAnimatedStyle(() => ({
     width: withTiming(
       onPurchase.value && CardDetailsData?.length > 1 ? '100%' : '75%',
-      {duration: 2000},
+      {duration: 3000},
     ),
     height: withTiming(
       onPurchase.value && CardDetailsData?.length > 1
         ? SizeConfig.height * 100
         : SizeConfig.height * 6,
-      {duration: 2000},
+      {duration: 3000},
     ),
     marginVertical: withTiming(
       onPurchase.value && CardDetailsData?.length > 1
         ? 0
         : SizeConfig.height * 7,
       {
-        duration: 2000,
+        duration: 3000,
       },
     ),
   }));
@@ -68,31 +75,26 @@ export default function HomeScreen() {
     opacity:
       onPurchase.value && CardDetailsData?.length > 1
         ? withDelay(
-            1500,
+            2500,
             withTiming(1, {
               duration: 1000,
             }),
           )
-        : withDelay(
-            1000,
-            withTiming(0, {
-              duration: 1000,
-            }),
-          ),
+        : 0,
 
     backgroundColor: 'gray',
   }));
   const MakeLoadingColorVisible = useAnimatedStyle(() => ({
     backgroundColor:
-      onPurchase.value && CardDetailsData?.length > 1 && CardDetailsData?.length
+      onPurchase.value && CardDetailsData?.length > 1
         ? withDelay(
-            1800,
+            2800,
             withTiming('white', {
               duration: 1000,
             }),
           )
         : withDelay(
-            1000,
+            2000,
             withTiming('gray', {
               duration: 1000,
             }),
@@ -100,61 +102,53 @@ export default function HomeScreen() {
   }));
 
   const PayItTextAnimation = useAnimatedStyle(() => ({
-    display:
-      onPurchase.value && CardDetailsData?.length > 1 && CardDetailsData?.length
-        ? 'none'
-        : 'flex',
+    display: onPurchase.value && CardDetailsData?.length > 1 ? 'none' : 'flex',
   }));
   const ProcessingTextAnimation = useAnimatedStyle(() => ({
-    display:
-      onPurchase.value && CardDetailsData?.length > 1 && CardDetailsData?.length
-        ? 'flex'
-        : 'none',
+    display: onPurchase.value && CardDetailsData?.length > 1 ? 'flex' : 'none',
+    opacity:
+      onPurchase.value && CardDetailsData?.length > 1
+        ? withDelay(
+            2500,
+            withTiming(1, {
+              duration: 1000,
+            }),
+          )
+        : 0,
   }));
 
   const showCompleteMessage = useAnimatedStyle(() => ({
-    opacity: withDelay(
-      4000,
-      withTiming(
-        onPurchase.value &&
-          CardDetailsData?.length > 1 &&
-          CardDetailsData?.length
-          ? 1
-          : 0,
-        {duration: 1000},
-      ),
-    ),
-    display:
-      onPurchase.value && CardDetailsData?.length > 1 && CardDetailsData?.length
-        ? 'flex'
-        : 'none',
+    opacity:
+      onPurchase.value && CardDetailsData?.length > 1
+        ? withDelay(
+            4000,
+            withTiming(1, {
+              duration: 1000,
+            }),
+          )
+        : 0,
+    display: onPurchase.value && CardDetailsData?.length > 1 ? 'flex' : 'none',
   }));
 
   const showCompleteMessageIcon = useAnimatedStyle(() => ({
     transform: [
       {
-        scale: withDelay(
-          4500,
-          withTiming(
-            onPurchase.value &&
-              CardDetailsData?.length &&
-              CardDetailsData?.length
-              ? SizeConfig.width * 0.29
-              : SizeConfig.width * 0,
-            {
-              duration: 500,
-            },
-          ),
-        ),
+        scale:
+          onPurchase.value && CardDetailsData?.length > 1
+            ? withDelay(
+                5500,
+                withTiming(SizeConfig.width * 0.23, {
+                  duration: 500,
+                }),
+              )
+            : 0,
       },
     ],
+    opacity:
+      onPurchase.value && CardDetailsData?.length > 1
+        ? withDelay(4500, withTiming(1))
+        : 0,
   }));
-
-  useEffect(() => {
-    console.log('******************************');
-    analytics().logEvent('app_opened');
-    console.log('******************************');
-  }, []);
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
@@ -181,20 +175,20 @@ export default function HomeScreen() {
               height: SizeConfig.deviceHeight,
               width: '100%',
             }}>
-            <GestureDetector gesture={NextSectionTapGesture}>
-              <Animated.View
-                style={[
-                  {
-                    backgroundColor:
-                      CardDetailsData.length > 1 ? '#f86f15' : 'gray',
-                    borderRadius: SizeConfig.width * 3,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: SizeConfig.height * 7,
-                  },
-                  ChangingTheScreenHeight,
-                ]}>
-                <>
+            <Animated.View
+              style={[
+                {
+                  backgroundColor:
+                    CardDetailsData.length > 1 ? '#f86f15' : 'gray',
+                  borderRadius: SizeConfig.width * 3,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: SizeConfig.height * 7,
+                },
+                ChangingTheScreenHeight,
+              ]}>
+              <>
+                <GestureDetector gesture={NextSectionTapGesture}>
                   <Animated.Text
                     style={[
                       {
@@ -206,102 +200,104 @@ export default function HomeScreen() {
                     ]}>
                     Pay It
                   </Animated.Text>
+                </GestureDetector>
 
-                  <View
-                    style={{
-                      position: 'absolute',
-                      gap: SizeConfig.width * 7,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                    <Animated.View
-                      style={[
-                        {flexDirection: 'row', gap: SizeConfig.width * 7},
-                        ProcessingTextAnimation,
-                      ]}>
-                      <Animated.View
-                        style={[
-                          {
-                            width: SizeConfig.width * 4,
-                            height: SizeConfig.width * 4,
-                            backgroundColor: 'white',
-                            borderRadius: (SizeConfig.width * 4) / 2,
-                          },
-                          MakeLoadingVisible,
-                          MakeLoadingColorVisible,
-                        ]}
-                      />
-                      <Animated.View
-                        style={[
-                          {
-                            width: SizeConfig.width * 4,
-                            height: SizeConfig.width * 4,
-                            backgroundColor: 'white',
-                            borderRadius: (SizeConfig.width * 4) / 2,
-                          },
-                          MakeLoadingVisible,
-                          MakeLoadingColorVisible,
-                        ]}
-                      />
-                      <Animated.View
-                        style={[
-                          {
-                            width: SizeConfig.width * 4,
-                            height: SizeConfig.width * 4,
-                            backgroundColor: 'white',
-                            borderRadius: (SizeConfig.width * 4) / 2,
-                          },
-                          MakeLoadingVisible,
-                          MakeLoadingColorVisible,
-                        ]}
-                      />
-                    </Animated.View>
-                    <Animated.View style={[ProcessingTextAnimation]}>
-                      <Text
-                        style={{
-                          fontFamily: 'RedHatDisplay-Bold',
-                          fontSize: SizeConfig.fontSize * 6,
-                          color: 'white',
-                        }}>
-                        Processing
-                      </Text>
-                    </Animated.View>
-                  </View>
+                <View
+                  style={{
+                    position: 'absolute',
+                    gap: SizeConfig.width * 13,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
                   <Animated.View
                     style={[
-                      {
-                        backgroundColor: '#f86f15',
-                        borderRadius: SizeConfig.width * 3,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                        width: '100%',
-                        gap: SizeConfig.height * 2,
-                      },
-                      showCompleteMessage,
+                      {flexDirection: 'row', gap: SizeConfig.width * 7},
+                      ProcessingTextAnimation,
                     ]}>
                     <Animated.View
                       style={[
                         {
+                          width: SizeConfig.width * 4,
+                          height: SizeConfig.width * 4,
                           backgroundColor: 'white',
-                          width: SizeConfig.width * 15,
-                          height: SizeConfig.width * 15,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: (SizeConfig.width * 15) / 2,
+                          borderRadius: (SizeConfig.width * 4) / 2,
                         },
-                        showCompleteMessageIcon,
-                      ]}>
-                      <Image
-                        source={require('../../assets/images/Home/tick.png')}
-                        style={{
-                          width: SizeConfig.width * 10,
-                          height: SizeConfig.width * 10,
-                          resizeMode: 'center',
-                          tintColor: '#f86f15',
-                        }}
-                      />
-                    </Animated.View>
+                        MakeLoadingVisible,
+                        MakeLoadingColorVisible,
+                      ]}
+                    />
+                    <Animated.View
+                      style={[
+                        {
+                          width: SizeConfig.width * 4,
+                          height: SizeConfig.width * 4,
+                          backgroundColor: 'white',
+                          borderRadius: (SizeConfig.width * 4) / 2,
+                        },
+                        MakeLoadingVisible,
+                        MakeLoadingColorVisible,
+                      ]}
+                    />
+                    <Animated.View
+                      style={[
+                        {
+                          width: SizeConfig.width * 4,
+                          height: SizeConfig.width * 4,
+                          backgroundColor: 'white',
+                          borderRadius: (SizeConfig.width * 4) / 2,
+                        },
+                        MakeLoadingVisible,
+                        MakeLoadingColorVisible,
+                      ]}
+                    />
+                  </Animated.View>
+                  <Animated.View style={[ProcessingTextAnimation]}>
+                    <Text
+                      style={{
+                        fontFamily: 'RedHatDisplay-Bold',
+                        fontSize: SizeConfig.fontSize * 6,
+                        color: 'white',
+                      }}>
+                      Processing
+                    </Text>
+                  </Animated.View>
+                </View>
+                <Animated.View
+                  style={[
+                    {
+                      backgroundColor: '#f86f15',
+                      borderRadius: SizeConfig.width * 3,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      width: '100%',
+                      gap: SizeConfig.height * 2,
+                    },
+                    showCompleteMessage,
+                  ]}>
+                  <Animated.View
+                    style={[
+                      {
+                        backgroundColor: 'white',
+                        width: SizeConfig.width * 15,
+                        height: SizeConfig.width * 15,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: (SizeConfig.width * 15) / 2,
+                      },
+                      showCompleteMessageIcon,
+                    ]}>
+                    <Image
+                      source={require('../../assets/images/Home/tick.png')}
+                      style={{
+                        width: SizeConfig.width * 10,
+                        height: SizeConfig.width * 10,
+                        resizeMode: 'center',
+                        tintColor: '#f86f15',
+                      }}
+                    />
+                  </Animated.View>
+                  <Animated.View style={[showCompleteMessageIcon]}>
                     <Text
                       style={{
                         fontSize: SizeConfig.fontSize * 6,
@@ -311,9 +307,9 @@ export default function HomeScreen() {
                       Complete!
                     </Text>
                   </Animated.View>
-                </>
-              </Animated.View>
-            </GestureDetector>
+                </Animated.View>
+              </>
+            </Animated.View>
           </View>
         </View>
       </SafeAreaView>

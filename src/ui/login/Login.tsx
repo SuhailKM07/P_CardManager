@@ -15,8 +15,9 @@ import LottieView from 'lottie-react-native';
 import {scaleZetaToMatchClamps} from 'react-native-reanimated/lib/typescript/animation/springUtils';
 import {Icon} from 'react-native-basic-elements';
 import CustomGoogleButton from './CustomGoogleButton';
+import {NavigationRoute} from '@react-navigation/native';
 
-export default function Login() {
+export default function Login({navigation}) {
   return (
     <SafeAreaView style={{flex: 1}}>
       <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
@@ -24,7 +25,7 @@ export default function Login() {
       <View
         style={{
           paddingHorizontal: SizeConfig.width * 5,
-          paddingVertical: SizeConfig.height * 4,
+          // marginVertical: SizeConfig.height * 4,
           flex: 1,
           backgroundColor: 'white',
         }}>
@@ -37,7 +38,7 @@ export default function Login() {
           loop
         />
 
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <View style={{gap: SizeConfig.height * 3}}>
             <View style={{gap: SizeConfig.height * 3}}>
               <View style={{gap: SizeConfig.height * 1}}>
@@ -84,6 +85,9 @@ export default function Login() {
             </View>
 
             <Pressable
+              onPress={() => {
+                navigation.navigate('nav');
+              }}
               style={{
                 flexDirection: 'row',
                 backgroundColor: '#90EE90',

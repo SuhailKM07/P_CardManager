@@ -217,14 +217,6 @@ export const CreditCardLayout = () => {
     }
   }, [pushNext]);
 
-  console.log('cardNo ', cardNo);
-  console.log('secretLable ', secretLable);
-  console.log('cardHolder ', cardHolder);
-  console.log('exDate ', exDate);
-  console.log('pinCode ', pinCode);
-  console.log('pushNext ', pushNext);
-  console.log('AddNewCard', AddNewCard);
-
   useEffect(() => {
     if (
       cardNo.length >= 19 &&

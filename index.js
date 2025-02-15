@@ -12,4 +12,5 @@ GoogleSignin.configure({
   scopes: ['profile', 'email'],
   forceCodeForRefreshToken: true, // Ensures fresh authentication
 });
+
 AppRegistry.registerComponent(appName, () => App);

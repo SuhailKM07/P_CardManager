@@ -1,14 +1,19 @@
 import {Icon} from 'react-native-basic-elements';
-import {SizeConfig} from '../../../components/SizeConfig';
+import {SizeConfig} from '../../components/SizeConfig';
 import {
+  FlatList,
   Image,
-  PixelRatio,
+  Keyboard,
   Pressable,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
 import {
   runOnJS,
   useAnimatedStyle,
@@ -16,8 +21,7 @@ import {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import {useEffect, useRef, useState} from 'react';
-import analytics from '@react-native-firebase/analytics';
+import {useEffect, useState} from 'react';
 
 export const Headder = () => {
   return (
@@ -48,14 +52,14 @@ export const Headder = () => {
 };
 
 import React from 'react';
+
 import Animated from 'react-native-reanimated';
-import {AllCardDetails} from '../../../redux/slices/CardDetailsSlice';
+import {AllCardDetails} from '../../redux/slices/CardDetailsSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import Carousel from 'react-native-reanimated-carousel';
-import {RootState} from '../../../redux/Store';
-import Snackbar from 'react-native-snackbar';
+import {baseGestureHandlerProps} from 'react-native-gesture-handler/lib/typescript/handlers/gestureHandlerCommon';
+import {RootState} from '../../redux/Store';
 
-const scaleFactor = PixelRatio.get();
 export const CreditCardLayout = () => {
   const NexSection = useSharedValue<boolean>(false);
   const pressed = useSharedValue<boolean>(false);
@@ -67,27 +71,21 @@ export const CreditCardLayout = () => {
   const [pinCode, setPinCode] = useState('');
   const [pushNext, setPushNext] = useState(false);
   const [AddNewCard, setAddNewCard] = useState(false);
-  const [isBtnPressed, setBtnPressed] = useState(false);
 
   let dispatch = useDispatch();
 
   const NextSectionTapGesture = Gesture.Tap()
-    .runOnJS(true)
+    // .runOnJS(true)
     .onBegin(() => {
-      if (pushNext) {
-        NexSection.value = pushNext ? true : false;
-        runOnJS(setBtnPressed)(true);
-      }
+      NexSection.value = pushNext ? true : false;
     });
 
   const HideSuccessMessage = useAnimatedStyle(() => ({
-    opacity: NexSection.value
-      ? withDelay(3000, withTiming(1, {duration: 1000})) // Fade in
-      : withTiming(0, {duration: 500}), // Fade out
-
-    position: NexSection.value ? 'relative' : 'absolute', // Keep out of layout flow when hidden
-
-    zIndex: NexSection.value ? 1 : -1, // Send to back when hidden
+    opacity: withDelay(
+      3000,
+      withTiming(NexSection.value ? 1 : 0, {duration: 1000}),
+    ),
+    display: NexSection.value ? 'flex' : 'none',
   }));
 
   const ScaleSuccessMessageIcon = useAnimatedStyle(() => ({
@@ -107,24 +105,24 @@ export const CreditCardLayout = () => {
   }));
 
   const NextSectionAnimatedStyles = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: withTiming(NexSection.value ? 0 : SizeConfig.width * 63, {
-          duration: 1000,
-        }),
-      },
-    ],
+    position: withTiming(NexSection.value ? 'relative' : 'absolute', {
+      duration: 2000,
+    }),
+
+    left: withTiming(NexSection.value ? 0 : SizeConfig.width * 61, {
+      duration: 2000,
+    }),
 
     width: withTiming(
-      NexSection.value ? SizeConfig.width * 4 : SizeConfig.width * 13,
+      NexSection.value ? SizeConfig.width * 3 : SizeConfig.width * 13,
       {
-        duration: 1000,
+        duration: 2000,
       },
     ),
     height: withTiming(
-      NexSection.value ? SizeConfig.width * 4 : SizeConfig.width * 13,
+      NexSection.value ? SizeConfig.width * 3 : SizeConfig.width * 13,
       {
-        duration: 1000,
+        duration: 2000,
       },
     ),
 
@@ -133,7 +131,7 @@ export const CreditCardLayout = () => {
         ? (SizeConfig.width * 13) / 2
         : (SizeConfig.width * 13) / 2,
       {
-        duration: 1000,
+        duration: 2000,
       },
     ),
   }));
@@ -143,28 +141,30 @@ export const CreditCardLayout = () => {
       ? withDelay(
           1500,
           withTiming(1, {
-            duration: 500,
+            duration: 1000,
           }),
         )
       : withDelay(
           1000,
           withTiming(0, {
-            duration: 500,
+            duration: 1000,
           }),
         ),
+
+    backgroundColor: 'gray',
   }));
   const MakeLoadingColorVisible = useAnimatedStyle(() => ({
     backgroundColor: NexSection.value
       ? withDelay(
           1800,
           withTiming('#f86f15', {
-            duration: 500,
+            duration: 1000,
           }),
         )
       : withDelay(
           1000,
           withTiming('gray', {
-            duration: 500,
+            duration: 1000,
           }),
         ),
   }));
@@ -192,7 +192,7 @@ export const CreditCardLayout = () => {
   };
 
   useEffect(() => {
-    if (pushNext && isBtnPressed) {
+    if (pushNext) {
       setTimeout(() => {
         dispatch(
           AllCardDetails({
@@ -213,14 +213,13 @@ export const CreditCardLayout = () => {
         setPinCode('');
         setPushNext(false);
         setAddNewCard(false);
-        setBtnPressed(false);
       }, 5700);
     }
-  }, [pushNext, isBtnPressed]);
+  }, [pushNext]);
 
   useEffect(() => {
     if (
-      cardNo.length >= 16 &&
+      cardNo.length >= 19 &&
       secretLable.length &&
       cardHolder.length &&
       exDate.length &&
@@ -243,11 +242,11 @@ export const CreditCardLayout = () => {
       }
       StringSlicer(name, count, lable);
       count++;
-    }, 10);
+    }, 200);
   };
 
   const tapGesture = Gesture.Tap()
-    .runOnJS(true)
+    // .runOnJS(true)
     .onBegin(() => {
       pressed.value = true;
     });
@@ -256,7 +255,7 @@ export const CreditCardLayout = () => {
     transform: [
       {
         translateY: withTiming(
-          cardNo.length >= 5 ? SizeConfig.width * 3 : -SizeConfig.width * 18,
+          pressed.value ? SizeConfig.width * 0 : -SizeConfig.width * 18,
         ),
       },
     ],
@@ -274,9 +273,12 @@ export const CreditCardLayout = () => {
   const ListOfCards = useAnimatedStyle(() => ({
     transform: [
       {
-        scale: withTiming(!NexSection.value ? 1 : 0, {
-          duration: 500,
-        }),
+        scale: withTiming(
+          !NexSection.value ? SizeConfig.width * 0.27 : SizeConfig.width * 0,
+          {
+            duration: 500,
+          },
+        ),
       },
     ],
   }));
@@ -285,32 +287,23 @@ export const CreditCardLayout = () => {
     (state: RootState) => state.CardDetailsSlice.list,
   );
 
-  let CardNoRef = useRef<TextInput | null>(null);
-  let secretLableRef = useRef<TextInput | null>(null);
-  let cardHolderRef = useRef<TextInput | null>(null);
-  let exDateRef = useRef<TextInput | null>(null);
-  let pinCodeRef = useRef<TextInput | null>(null);
-
   return (
     <Carousel
       data={CardDetailsData}
       height={SizeConfig.height * 32}
-      enabled={CardDetailsData?.length > 1}
       loop={false}
       width={SizeConfig.width * 100}
       style={{
         width: '100%',
-        height: SizeConfig.height * 32,
+        height: SizeConfig.height * 30,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
       }}
       mode="parallax"
       modeConfig={{
-        parallaxScrollingScale: (SizeConfig.deviceWidth * 0.0045) / scaleFactor,
-        parallaxAdjacentItemScale:
-          (SizeConfig.deviceWidth * 0.0045) / scaleFactor,
-        parallaxScrollingOffset: SizeConfig.width * 10,
+        parallaxScrollingScale: 0.8,
+        parallaxAdjacentItemScale: 0.57,
       }}
       renderItem={({
         item,
@@ -339,7 +332,7 @@ export const CreditCardLayout = () => {
                     backgroundColor: 'black',
                     borderRadius: SizeConfig.width * 3,
                     height: SizeConfig.height * 28,
-                    elevation: 10,
+                    elevation: 20,
                     shadowColor: 'black',
                   },
                   ListOfCards,
@@ -351,7 +344,7 @@ export const CreditCardLayout = () => {
                   }}>
                   <View
                     style={{
-                      width: SizeConfig.width * 53,
+                      width: SizeConfig.width * 50,
                     }}>
                     <Text
                       style={{
@@ -507,6 +500,7 @@ export const CreditCardLayout = () => {
                     style={[
                       {
                         height: SizeConfig.height * 28,
+                        width: '100%',
                         borderWidth: 1,
                         borderColor: '#f86f15',
                         borderRadius: SizeConfig.width * 3,
@@ -547,16 +541,23 @@ export const CreditCardLayout = () => {
                     </Text>
                   </View>
                 ) : (
-                  <View>
+                  <Animated.View
+                    style={[
+                      {
+                        backgroundColor: 'black',
+                        borderRadius: SizeConfig.width * 3,
+                        height: SizeConfig.height * 28,
+                      },
+                      FillNewCardTapAnimatedStyle,
+                    ]}>
                     <Animated.View
                       style={[
                         {
                           justifyContent: 'space-evenly',
+                          height: '100%',
                           paddingHorizontal: SizeConfig.width * 5,
                           paddingVertical: SizeConfig.width * 3,
                           overflow: 'hidden',
-                          borderRadius: SizeConfig.width * 3,
-                          height: SizeConfig.height * 28,
                         },
                         ChangingTheNextScreen,
                       ]}>
@@ -567,7 +568,7 @@ export const CreditCardLayout = () => {
                         }}>
                         <View
                           style={{
-                            width: SizeConfig.width * 53,
+                            width: SizeConfig.width * 50,
                           }}>
                           <Text
                             style={{
@@ -579,8 +580,6 @@ export const CreditCardLayout = () => {
                           </Text>
                           <TextInput
                             value={cardNo}
-                            ref={CardNoRef}
-                            inputMode="numeric"
                             style={{
                               fontSize: SizeConfig.fontSize * 4,
                               fontFamily: 'RedHatDisplay-ExtraBold',
@@ -589,30 +588,14 @@ export const CreditCardLayout = () => {
                               borderBottomWidth: 1,
                             }}
                             onChangeText={text => {
-                              // Remove any existing spaces
-                              let newText = text.replace(/\s/g, '');
-
-                              // Ensure only digits and max length 19 (16 digits + 3 spaces)
-                              if (/^\d*$/.test(newText)) {
-                                if (newText.length <= 16) {
-                                  // Format text into groups of 4
-                                  let formattedText = newText
-                                    .replace(/(\d{4})/g, '$1 ')
-                                    .trim();
-                                  setCardNo(formattedText);
-                                } else {
-                                  if (secretLableRef.current) {
-                                    secretLableRef.current.focus();
-                                  }
-                                }
-                              }
+                              setCardNo(text);
                             }}
-                            // onPress={() => {
-                            //   timerFunction(
-                            //     '0000 0000 0000 0000',
-                            //     'cardNumber',
-                            //   );
-                            // }}
+                            onPress={() => {
+                              timerFunction(
+                                '0000 0000 0000 0000',
+                                'cardNumber',
+                              );
+                            }}
                           />
                         </View>
                         <View
@@ -629,8 +612,6 @@ export const CreditCardLayout = () => {
                           </Text>
                           <TextInput
                             value={secretLable}
-                            inputMode="numeric"
-                            ref={secretLableRef}
                             style={{
                               fontSize: SizeConfig.fontSize * 4,
                               fontFamily: 'RedHatDisplay-Bold',
@@ -639,17 +620,11 @@ export const CreditCardLayout = () => {
                               borderBottomWidth: 1,
                             }}
                             onChangeText={text => {
-                              if (/^\d*$/.test(text)) {
-                                if (text.length <= 3) {
-                                  setSecretLable(text);
-                                } else {
-                                  cardHolderRef.current?.focus();
-                                }
-                              }
+                              setSecretLable(text);
                             }}
-                            // onPress={() => {
-                            //   timerFunction('123', 'secretLable');
-                            // }}
+                            onPress={() => {
+                              timerFunction('123', 'secretLable');
+                            }}
                           />
                         </View>
                       </View>
@@ -668,8 +643,6 @@ export const CreditCardLayout = () => {
                         </Text>
                         <TextInput
                           value={cardHolder}
-                          ref={cardHolderRef}
-                          inputMode="text"
                           style={{
                             fontSize: SizeConfig.fontSize * 4,
                             fontFamily: 'RedHatDisplay-Bold',
@@ -678,17 +651,11 @@ export const CreditCardLayout = () => {
                             borderBottomWidth: 1,
                           }}
                           onChangeText={text => {
-                            if (/^[A-Za-z]+$/.test(text)) {
-                              if (text.length <= 10) {
-                                setCardHolder(text);
-                              } else {
-                                exDateRef.current?.focus();
-                              }
-                            }
+                            setCardHolder(text);
                           }}
-                          // onPress={() => {
-                          //   timerFunction('Suhail S', 'cardHolder');
-                          // }}
+                          onPress={() => {
+                            timerFunction('Suhail S', 'cardHolder');
+                          }}
                         />
                       </View>
                       <View
@@ -710,8 +677,6 @@ export const CreditCardLayout = () => {
                           </Text>
                           <TextInput
                             value={exDate}
-                            ref={exDateRef}
-                            inputMode="numeric"
                             style={{
                               fontSize: SizeConfig.fontSize * 4,
                               fontFamily: 'RedHatDisplay-Bold',
@@ -720,49 +685,11 @@ export const CreditCardLayout = () => {
                               borderBottomWidth: 1,
                             }}
                             onChangeText={text => {
-                              let newText = text.replace(/\D/g, '');
-
-                              if (newText.length > 4) return;
-
-                              if (newText.length > 2) {
-                                newText =
-                                  newText.slice(0, 2) + '/' + newText.slice(2);
-                              }
-
-                              let month = parseInt(newText.slice(0, 2), 10);
-                              if (month < 0 || month > 12) {
-                                Snackbar.show({
-                                  text: 'Enter a valid month (01-12)',
-                                  duration: 1000,
-                                  action: {
-                                    text: 'UNDO',
-                                    textColor: 'red',
-                                  },
-                                });
-                                return;
-                              }
-
-                              if (newText.length === 5) {
-                                let year = parseInt(newText.slice(3), 10);
-                                let currentYear =
-                                  new Date().getFullYear() % 100;
-                                if (year < currentYear) {
-                                  Snackbar.show({
-                                    text: 'Enter a valid expiration year',
-                                    duration: 1000,
-                                  });
-                                  return;
-                                } else {
-                                  pinCodeRef.current?.focus();
-                                }
-                              }
-
-                              setExDate(newText);
+                              setExDate(text);
                             }}
-
-                            // onPress={() => {
-                            //   timerFunction('01/23', 'exDate');
-                            // }}
+                            onPress={() => {
+                              timerFunction('01/23', 'exDate');
+                            }}
                           />
                         </View>
                         <View
@@ -779,8 +706,6 @@ export const CreditCardLayout = () => {
                           </Text>
                           <TextInput
                             value={pinCode}
-                            inputMode="numeric"
-                            ref={pinCodeRef}
                             style={{
                               fontSize: SizeConfig.fontSize * 4,
                               fontFamily: 'RedHatDisplay-Bold',
@@ -789,13 +714,11 @@ export const CreditCardLayout = () => {
                               borderBottomWidth: 1,
                             }}
                             onChangeText={text => {
-                              if (/^\d*$/.test(text) && text.length <= 6) {
-                                setPinCode(text);
-                              }
+                              setPinCode(text);
                             }}
-                            // onPress={() =>
-                            //   timerFunction('03294', 'pinCode');
-                            // }}
+                            onPress={() => {
+                              timerFunction('03294', 'pinCode');
+                            }}
                           />
                         </View>
                         <GestureDetector gesture={tapGesture}>
@@ -823,145 +746,132 @@ export const CreditCardLayout = () => {
                         </GestureDetector>
                       </View>
                     </Animated.View>
-                    <>
-                      <Animated.View
-                        style={[
-                          {
-                            height: SizeConfig.height * 28,
-                            borderRadius: SizeConfig.width * 3,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            position: 'absolute',
-                            width: '100%',
-                            zIndex: -1,
-                            backgroundColor: 'black',
-                          },
-                          FillNewCardTapAnimatedStyle,
-                        ]}>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            gap: SizeConfig.width * 13,
-                            width: '100%',
-                            justifyContent: 'center',
-                            height: SizeConfig.height * 7,
-                          }}>
-                          <GestureDetector gesture={NextSectionTapGesture}>
-                            <Animated.View
-                              style={[
-                                {
-                                  backgroundColor: pushNext
-                                    ? '#f86f15'
-                                    : 'gray',
-                                  width: SizeConfig.width * 13,
-                                  height: SizeConfig.width * 13,
-                                  borderRadius: (SizeConfig.width * 13) / 2,
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  overflow: 'hidden',
-                                  zIndex: 10,
-                                  transform: [
-                                    {translateX: SizeConfig.width * 63},
-                                  ],
-                                },
-                                NextSectionAnimatedStyles,
-                              ]}>
-                              {isBtnPressed ? (
-                                ''
-                              ) : (
-                                <Icon
-                                  type="AntDesign"
-                                  name="arrowright"
-                                  size={SizeConfig.width * 8}
-                                  color={'white'}
-                                />
-                              )}
-                            </Animated.View>
-                          </GestureDetector>
-                          <Animated.View
-                            style={[
-                              {
-                                width: SizeConfig.width * 4,
-                                height: SizeConfig.width * 4,
-                                borderRadius: (SizeConfig.width * 4) / 2,
-                                backgroundColor: 'gray',
-                              },
-                              MakeLoadingVisible,
-                              MakeLoadingColorVisible,
-                            ]}
-                          />
-                          <Animated.View
-                            style={[
-                              {
-                                width: SizeConfig.width * 4,
-                                height: SizeConfig.width * 4,
-                                borderRadius: (SizeConfig.width * 4) / 2,
-                                backgroundColor: 'gray',
-                              },
-                              MakeLoadingVisible,
-                              MakeLoadingColorVisible,
-                            ]}
-                          />
-                        </View>
-                        <Animated.Text
-                          style={[
-                            {
-                              fontSize: SizeConfig.fontSize * 4,
-                              color: 'white',
-                              fontFamily: 'RedHatDisplay-Bold',
-                            },
-                            ChangingTheNextScreenText,
-                          ]}>
-                          Verifying Your Card
-                        </Animated.Text>
-                      </Animated.View>
 
-                      <Animated.View
-                        style={[
-                          {
-                            backgroundColor: 'black',
-                            borderRadius: SizeConfig.width * 3,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            height: SizeConfig.height * 28,
-                            gap: SizeConfig.height * 2,
-                          },
-                          HideSuccessMessage,
-                        ]}>
+                    <View
+                      style={{
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'absolute',
+                        width: '100%',
+                        zIndex: -3,
+                      }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: SizeConfig.width * 13,
+                          width: '100%',
+                          justifyContent: 'center',
+                          height: SizeConfig.height * 7,
+                        }}>
+                        {/* Wrapping an Animated.View inside GestureDetector */}
+                        <GestureDetector gesture={NextSectionTapGesture}>
+                          <Animated.View
+                            style={[
+                              {
+                                backgroundColor: pushNext ? '#f86f15' : 'gray',
+                                width: SizeConfig.width * 13,
+                                height: SizeConfig.width * 13,
+                                borderRadius: (SizeConfig.width * 13) / 2,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
+                                zIndex: 10,
+                              },
+                              NextSectionAnimatedStyles,
+                            ]}>
+                            <Icon
+                              type="AntDesign"
+                              name="arrowright"
+                              size={SizeConfig.width * 8}
+                              color={'white'}
+                            />
+                          </Animated.View>
+                        </GestureDetector>
+
                         <Animated.View
                           style={[
                             {
+                              width: SizeConfig.width * 3,
+                              height: SizeConfig.width * 3,
                               backgroundColor: '#f86f15',
-                              width: SizeConfig.width * 15,
-                              height: SizeConfig.width * 15,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderRadius: (SizeConfig.width * 15) / 2,
+                              borderRadius: (SizeConfig.width * 3) / 2,
                             },
-                            ScaleSuccessMessageIcon,
-                          ]}>
-                          <Image
-                            source={require('../../../assets/images/Home/tick.png')}
-                            style={{
-                              width: SizeConfig.width * 10,
-                              height: SizeConfig.width * 10,
-                              resizeMode: 'center',
-                              tintColor: 'white',
-                            }}
-                          />
-                        </Animated.View>
-                        <Text
-                          style={{
+                            MakeLoadingVisible,
+                            MakeLoadingColorVisible,
+                          ]}
+                        />
+                        <Animated.View
+                          style={[
+                            {
+                              width: SizeConfig.width * 3,
+                              height: SizeConfig.width * 3,
+                              backgroundColor: '#f86f15',
+                              borderRadius: (SizeConfig.width * 3) / 2,
+                            },
+                            MakeLoadingVisible,
+                            MakeLoadingColorVisible,
+                          ]}
+                        />
+                      </View>
+                      <Animated.Text
+                        style={[
+                          {
                             fontSize: SizeConfig.fontSize * 4,
                             color: 'white',
                             fontFamily: 'RedHatDisplay-Bold',
-                          }}>
-                          Successfully Added!
-                        </Text>
+                          },
+                          ChangingTheNextScreenText,
+                        ]}>
+                        Verifying Your Card
+                      </Animated.Text>
+                    </View>
+
+                    <Animated.View
+                      style={[
+                        {
+                          backgroundColor: 'black',
+                          borderRadius: SizeConfig.width * 3,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          gap: SizeConfig.height * 2,
+                        },
+                        HideSuccessMessage,
+                      ]}>
+                      <Animated.View
+                        style={[
+                          {
+                            backgroundColor: '#f86f15',
+                            width: SizeConfig.width * 15,
+                            height: SizeConfig.width * 15,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: (SizeConfig.width * 15) / 2,
+                          },
+                          ScaleSuccessMessageIcon,
+                        ]}>
+                        <Image
+                          source={require('../../../assets/images/Home/tick.png')}
+                          style={{
+                            width: SizeConfig.width * 10,
+                            height: SizeConfig.width * 10,
+                            resizeMode: 'center',
+                            tintColor: 'white',
+                          }}
+                        />
                       </Animated.View>
-                    </>
-                  </View>
+                      <Text
+                        style={{
+                          fontSize: SizeConfig.fontSize * 4,
+                          color: 'white',
+                          fontFamily: 'RedHatDisplay-Bold',
+                        }}>
+                        Successfully Added!
+                      </Text>
+                    </Animated.View>
+                  </Animated.View>
                 )}
               </View>
             );
@@ -983,17 +893,6 @@ export const BillingDetails = () => {
         elevation: 10,
       }}>
       <Text
-        onPress={async () => {
-          try {
-            await analytics().logEvent('dateis14', {
-              name: 'suhail',
-              person: 'good boy',
-            });
-            console.log('Event logged successfully!');
-          } catch (error) {
-            console.error('Error logging event:', error);
-          }
-        }}
         style={{
           fontFamily: 'RedHatDisplay-Bold',
           fontSize: SizeConfig.fontSize * 5,
