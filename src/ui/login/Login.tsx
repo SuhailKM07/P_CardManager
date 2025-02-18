@@ -16,8 +16,12 @@ import {scaleZetaToMatchClamps} from 'react-native-reanimated/lib/typescript/ani
 import {Icon} from 'react-native-basic-elements';
 import CustomGoogleButton from './CustomGoogleButton';
 import {NavigationRoute} from '@react-navigation/native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {StackNavigationTypes} from '../../navigation/NavigationTypes';
 
-export default function Login({navigation}) {
+type LoginScreenProps = NativeStackScreenProps<StackNavigationTypes, 'Login'>;
+
+const Login = ({navigation}: LoginScreenProps) => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <StatusBar backgroundColor={'white'} barStyle={'dark-content'} />
@@ -85,9 +89,6 @@ export default function Login({navigation}) {
             </View>
 
             <Pressable
-              onPress={() => {
-                navigation.navigate('nav');
-              }}
               style={{
                 flexDirection: 'row',
                 backgroundColor: '#90EE90',
@@ -123,6 +124,8 @@ export default function Login({navigation}) {
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({});
+
+export default Login;

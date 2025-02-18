@@ -1,4 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
+import {getAllUsers} from '../../firebase/FireDaseDB';
+
+let AllUserCardData = getAllUsers();
 
 const CardDetailsSlice = createSlice({
   name: 'CardDetails',

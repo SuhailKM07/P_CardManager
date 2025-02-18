@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "657969514439",
-    "project_id": "ecardsmanager-30d2d",
-    "storage_bucket": "ecardsmanager-30d2d.firebasestorage.app"
+    "project_number": "991279527766",
+    "project_id": "cardmanager-b6e28",
+    "storage_bucket": "cardmanager-b6e28.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:657969514439:android:673001ef414b5d9848fbe2",
+        "mobilesdk_app_id": "1:991279527766:android:05b9d1fd0fd0f1b67948f7",
         "android_client_info": {
           "package_name": "com.cardmanagement"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDxldK0NWxM64aVg7XenkVyJRQCmPVmx3Q"
+          "current_key": "AIzaSyD_PB1-TxsXL2vG5kjjnmdt4GmrkId9Wt4"
         }
       ],
       "services": {
