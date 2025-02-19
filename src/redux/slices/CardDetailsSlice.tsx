@@ -1,7 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 import {getAllUsers} from '../../firebase/FireDaseDB';
-
-let AllUserCardData = getAllUsers();
+import {useEffect} from 'react';
 
 const CardDetailsSlice = createSlice({
   name: 'CardDetails',
@@ -23,8 +22,13 @@ const CardDetailsSlice = createSlice({
     AllCardDetails(state, action) {
       state.list = [action.payload, ...state.list];
     },
+
+    FireBaseCardDetails(state, action) {
+      // console.log(action);
+      state.list = [...action.payload, ...state.list];
+    },
   },
 });
 
-export const {AllCardDetails} = CardDetailsSlice.actions;
+export const {AllCardDetails, FireBaseCardDetails} = CardDetailsSlice.actions;
 export default CardDetailsSlice.reducer;

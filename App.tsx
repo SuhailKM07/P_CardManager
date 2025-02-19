@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import HomeScreen from './src/ui/home/HomeScreen';
 import {Provider} from 'react-redux';
 import {Store} from './src/redux/Store';
@@ -9,9 +9,10 @@ import messaging, {firebase} from '@react-native-firebase/messaging';
 import {Alert} from 'react-native';
 import PushNotification from 'react-native-push-notification';
 import {StackNavigationTypes} from './src/navigation/NavigationTypes';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const Stack = createNativeStackNavigator<StackNavigationTypes>();
 
-export default function App() {
+function App() {
   const fcmToken = async () => {
     const fcmToken = await messaging().getToken();
     console.log('New FCM:', fcmToken);
@@ -48,16 +49,36 @@ export default function App() {
     fcmToken();
   }, []);
 
+  const [initialRoute, setInitialRoute] = useState<
+    keyof StackNavigationTypes | null
+  >(null);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const value = await AsyncStorage.getItem('userLoginToken');
+        setInitialRoute(value !== null ? 'Home' : 'Login');
+        console.log('User ID Tokken ', value);
+      } catch (error) {
+        console.error('Error retrieving data:', error);
+        setInitialRoute('Login');
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  if (initialRoute === null) return null;
+
   return (
     <Provider store={Store}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator initialRouteName={initialRoute}>
           <Stack.Screen
-            name={'Login'}
+            name="Login"
             component={Login}
             options={{headerShown: false}}
           />
-
           <Stack.Screen
             name="Home"
             component={HomeScreen}
@@ -68,3 +89,5 @@ export default function App() {
     </Provider>
   );
 }
+
+export default App;
